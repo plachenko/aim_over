@@ -28,7 +28,7 @@ export default defineComponent({
     }
   },
   mounted: function(){
-    console.log(this.k)
+    // console.log(this.k)
     //
   }
 });

@@ -3,18 +3,23 @@
 
     <!-- Start Button -->
     <div id="startCont" v-show="!running">
-      <div id="start" class="btn" @click="onStart">start</div>
+      <div style="text-align: center; width: 200px;">
+        <div >
+          <h1>AIM OVER</h1>
+        </div>
+        <div id="start" class="btn" style="float: left;" @click="onStart">start</div>
+      </div>
     </div>
 
-    <div v-show="running && showTargets.length">
+    <div v-if="running && targetArr" id="targetCont">
 
-      <Target v-for="(target, i) in showTargets" :key="i" :pos="target" />
+      <Target v-for="target in targetArr" v-show="!target.hit" @on-hit="onHit(target.id)" :key="target.id" :pos="target" />
 
       <!-- Stats -->
       <div id="statsCont" v-if="running">
         <div style="background-color: #F00; padding: 10px;">
           <span>time: {{time}}</span>
-          <span>hit: {{targetsHit}}</span>
+          <!-- <span>hit: {{targetsHit}}</span> -->
         </div>
       </div>
 
@@ -27,31 +32,25 @@ import { defineComponent } from 'vue';
 import Target from './components/Target.vue';
 
 export interface TargetObj{
+  id: number,
   x: number,
   y: number,
   hit: boolean
 }
 
-let targetArr: TargetObj[] = []
+// let targetArr: TargetObj[] = []
 
 export default defineComponent({
   name: 'App',
   components: {
     Target
   },
-  computed: {
-    showTargets(){
-      return targetArr
-    },
-    targetsHit(){
-      return 0;
-    }
-  },
   data: function(){
     return{
+      targetArr: [],
       running: false,
-      time: 0,
-      timer: 0
+      timer: 0,
+      time: 0
     }
   },
   methods:{
@@ -61,19 +60,24 @@ export default defineComponent({
         this.time++;
       }, 1000)
     },
-    onHit(){
-      console.log('hitted')
+    onHit(i: number){
+      const tObj: TargetObj = this.targetArr[i]
+      tObj.hit = true;
     }
   },
   mounted: function(){
+    console.log(window.innerWidth, window.innerHeight)
     for(let i = 0; i< 10; i++){
       const targetObj: TargetObj = {
-        x: Math.round(Math.random()*300), 
-        y: Math.round(Math.random()*300),
+        id: i,
+        x: Math.round(Math.random()*window.innerWidth), 
+        y: Math.round(Math.random()*window.innerHeight),
         hit: false
       };
+      
+      const tArr: TargetObj[] = this.targetArr;
 
-      targetArr.push(targetObj)
+      tArr.push(targetObj)
     }
   }
 });
@@ -84,6 +88,7 @@ body, html{
   padding: 0px;
   margin: 0px;
   height: 100%;
+  overflow: hidden;
 }
 
 #app {
@@ -104,6 +109,10 @@ body, html{
 #statsCont{
   position: absolute;
   bottom: 0px;
+}
+
+#targetCont{
+  cursor: crosshair;
 }
 
 .btn{
