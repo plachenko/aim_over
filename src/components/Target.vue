@@ -1,5 +1,5 @@
 <template>
-  <div @click="onHit" :style="style" ref="target" class="circ"></div>
+  <div :style="styleObj" ref="target" class="circ"></div>
 </template>
 
 <script lang="ts">
@@ -11,13 +11,10 @@ export default defineComponent({
     pos: Object,
   },
   computed: {
-    style: () =>{
-      // let pos = this.pos
-      const x = Math.round(Math.random()*100)
-      const y = Math.round(Math.random()*100)
-      return `top: ${x}px, left: ${y}px`
+    styleObj(): string{
+      let pos = this.pos || {x: 0, y: 0, hit: false}
+      return `top: ${pos.x}px; left: ${pos.y}px;`
     }
-
   },
   data: function(){
     return {
@@ -32,7 +29,6 @@ export default defineComponent({
   },
   mounted: function(){
     console.log(this.pos)
-    console.log(this.$refs.target)
   }
 });
 </script>
