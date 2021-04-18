@@ -1,5 +1,5 @@
 <template>
-  <div :style="styleObj" ref="target" class="circ"></div>
+  <div :style="styleObj" @click="onHit" ref="target" class="circ"></div>
 </template>
 
 <script lang="ts">
@@ -24,11 +24,12 @@ export default defineComponent({
   methods:{
     onHit(){
       this.amtHit++;
-      this.$emit('on-hit')
+      this.$emit('on-hit', this)
     }
   },
   mounted: function(){
-    console.log(this.pos)
+    console.log(this.k)
+    //
   }
 });
 </script>
@@ -40,6 +41,7 @@ export default defineComponent({
   height: 30px;
   width: 30px;
   border-radius: 30px;
+  z-index: 9999;
   background-color:#F00;
 }
 </style>
