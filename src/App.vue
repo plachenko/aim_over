@@ -119,7 +119,7 @@ export default defineComponent({
   mounted(){
     document.addEventListener("keyup", (e)=>{
       switch(e.code){
-        case 'Backquote':
+        case 'KeyQ':
           this.DBGBuilder = !this.DBGBuilder;
           break;
       }
