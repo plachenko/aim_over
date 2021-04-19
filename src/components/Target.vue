@@ -1,5 +1,8 @@
 <template>
-  <div :style="styleObj" @click="onHit" ref="target" class="circ"></div>
+  <div>
+    <div :style="styleObj" @click="onHit" ref="target" id="inner" class="circ"></div>
+    <div :style="styleObj" @click="onHit" ref="target" class="circ"></div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -24,12 +27,37 @@ export default defineComponent({
   methods:{
     onHit(){
       this.amtHit++;
+      console.log(this);
       this.$emit('on-hit', this)
+    },
+    animate(){
+      const el: HTMLElement = this.$refs.target as HTMLElement;
+      const speed = 4;
+      let left: number = parseInt(el.style.left);
+      let leftAmt = 0;
+      let opacityAmt = 0;
+
+      if(this.pos){
+
+        let xPos = this.pos.x || 0;
+
+        setInterval(()=>{
+          if(left <= (xPos-left) + 10 || left >= xPos + 20){
+            opacityAmt -= .05;
+            leftAmt = ( left += speed );
+          }else{
+            opacityAmt += .04;
+            leftAmt = ( left += speed/40 );
+          }
+
+          el.style.opacity = opacityAmt+"";
+          el.style.left = ( leftAmt )+"px";
+        }, 10);
+      }
     }
   },
-  mounted: function(){
+  mounted(){
     // console.log(this.k)
-    //
   }
 });
 </script>
@@ -41,7 +69,14 @@ export default defineComponent({
   height: 30px;
   width: 30px;
   border-radius: 30px;
-  z-index: 9999;
+  z-index: 9998;
   background-color:#F00;
+  /* opacity: 0; */
+}
+#inner{
+  background-color:#FF0;
+  height: 10px;
+  width: 10px;
+  z-index: 9999;
 }
 </style>
