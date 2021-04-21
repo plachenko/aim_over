@@ -8,7 +8,7 @@
         <div>
           <h1>AIM OVER</h1>
           <span v-if="targetsHit > 1">Targets Hit: {{targetsHit}} / {{numTargets}}</span>
-          <span v-if="targetsHit > 1">Accuracy: {{targetsHit / numTargets}}%</span>
+          <span v-if="targetsHit > 1">Accuracy: {{targetHitPercent}}%</span>
         </div>
         <div id="start" class="btn" style="float: left;" @click="onStart">start</div>
       </div>
@@ -56,10 +56,17 @@ export default defineComponent({
     Target,
     Builder
   },
+  computed: {
+    targetHitPercent(): number{
+      const ratio = this.targetsHit / this.numTargets; 
+      return (ratio * 100);
+    }
+  },
   data: function(){
     return{
       DBGBuilder: false,
       targetArr: [],
+      tickTime: 900,
       numTargets: 10,
       targetsHit: 0,
       running: false,
@@ -84,7 +91,7 @@ export default defineComponent({
           this.onEnd()
         }
         this.time--;
-      }, 1000)
+      }, this.tickTime)
     },
     generateTargets(){
       const contEl = this.$refs.targetCont as HTMLElement;
