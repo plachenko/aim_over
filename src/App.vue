@@ -20,6 +20,8 @@
 
     <div id="targetCont" ref="targetCont" v-show="running && targetArr">
 
+      <div v-show="bFlash" id="flash" />
+
       <Target 
         v-show="checkTargetShow(target)"
         v-for="target in targetArr" 
@@ -73,15 +75,17 @@ export default defineComponent({
       tickTime: 900,
       numTargets: 10,
       targetsHit: 0,
+      iFlashTime: 30,
       running: false,
+      bFlash: false,
       timer: 10,
       time: 0
     }
   },
   methods:{
     checkTargetShow(target: TargetObj): boolean{
-      let res = true;
-      // let res = !target.hit && target.id+1 == this.time;
+      // let res = true;
+      let res = !target.hit && target.id+1 == this.time;
 
       return res;
     },
@@ -96,7 +100,7 @@ export default defineComponent({
 
       this.$nextTick(()=>{
         this.generateTargets();
-        // this.startTimer();
+        this.startTimer();
       })
     },
     startTimer(){
@@ -124,6 +128,11 @@ export default defineComponent({
     },
     onHit(i: number){
       console.log(i)
+      this.bFlash = true;
+      setTimeout(() => {
+        this.bFlash = false;
+      }, this.iFlashTime)
+
       const tObj: TargetObj = this.targetArr[i];
       tObj.hit = true;
 
@@ -206,4 +215,10 @@ body, html{
     cursor: crosshair;
     }
 
+#flash{
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background-color:#F00;
+}
 </style>
