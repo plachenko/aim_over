@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div :style="styleObj" @click="onHit" ref="target" id="inner" class="circ"></div>
-    <div :style="styleObj" @click="onHit" ref="target" class="circ"></div>
+    <div :style="styleObjInner" @click="onHit(2)" ref="target" id="inner" class="circ"></div>
+    <div :style="styleObj" @click="onHit(1)" ref="target" class="circ"></div>
   </div>
 </template>
 
@@ -15,8 +15,19 @@ export default defineComponent({
   },
   computed: {
     styleObj(): string{
-      let pos = this.pos || {x: 0, y: 0, hit: false}
-      return `top: ${pos.x}px; left: ${pos.y}px;`
+      let pos = this.pos || {x: 0, y: 0, hit: false};
+      return `top: ${pos.x}px; left: ${pos.y}px;`;
+    },
+    styleObjInner(): string{
+      let pos = this.pos || {x: 0, y: 0, hit: false};
+      let size = 10;
+
+      let offset = {
+        x: pos.x + size,
+        y: pos.y + size
+      }
+
+      return `top: ${offset.x}px; left: ${offset.y}px;`;
     }
   },
   data: function(){
@@ -25,10 +36,9 @@ export default defineComponent({
     }
   },
   methods:{
-    onHit(){
-      this.amtHit++;
-      console.log(this);
-      this.$emit('on-hit', this)
+    onHit(amt = 1){
+      this.amtHit += amt;
+      this.$emit('on-hit', this);
     },
     animate(){
       const el: HTMLElement = this.$refs.target as HTMLElement;
@@ -64,6 +74,7 @@ export default defineComponent({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 .circ{
   position: absolute;
   height: 30px;

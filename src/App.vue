@@ -7,21 +7,25 @@
       <div style="text-align: center; width: 200px;">
         <div>
           <h1>AIM OVER</h1>
-          <span v-if="targetsHit > 1">Targets Hit: {{targetsHit}} / {{numTargets}}</span>
+          <span>Targets Hit: {{targetsHit}} / {{numTargets}}</span>
           <span v-if="targetsHit > 1">Accuracy: {{targetHitPercent}}%</span>
         </div>
         <div id="start" class="btn" style="float: left;" @click="onStart">start</div>
       </div>
     </div>
 
+    <div>
+
+    </div>
+
     <div id="targetCont" ref="targetCont" v-show="running && targetArr">
 
       <Target 
-        v-show="!target.hit && target.id+1 == time" 
+        v-show="checkTargetShow(target)"
         v-for="target in targetArr" 
         :key="target.id" 
         :pos="target" 
-        @on-hit="onHit(target.id)" 
+        @on-hit="onHit(target.id, $event)" 
         />
 
       <!-- Stats -->
@@ -75,6 +79,12 @@ export default defineComponent({
     }
   },
   methods:{
+    checkTargetShow(target: TargetObj): boolean{
+      let res = true;
+      // let res = !target.hit && target.id+1 == this.time;
+
+      return res;
+    },
     reset(){
       this.time = 10;
       this.targetsHit = 0;
@@ -83,9 +93,13 @@ export default defineComponent({
     onStart(){
       this.running = true;
       this.reset();
+
       this.$nextTick(()=>{
         this.generateTargets();
+        // this.startTimer();
       })
+    },
+    startTimer(){
       this.timer = setInterval(() => {
         if(this.time <= 1){
           this.onEnd()
@@ -109,7 +123,8 @@ export default defineComponent({
       }
     },
     onHit(i: number){
-      const tObj: TargetObj = this.targetArr[i]
+      console.log(i)
+      const tObj: TargetObj = this.targetArr[i];
       tObj.hit = true;
 
       if(this.targetsHit >= this.targetArr.length-1){
@@ -121,6 +136,9 @@ export default defineComponent({
       this.running = false;
       clearInterval(this.timer);
       this.timer = 0;
+    },
+    onSpeed(amt = 1){
+      this.tickTime = (amt * 1000);
     }
   },
   mounted(){
@@ -131,7 +149,8 @@ export default defineComponent({
           break;
       }
     });
-    // this.onStart();
+
+    this.onStart();
   }
 });
 </script>
