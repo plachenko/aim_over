@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    {{pntMv}}
     <canvas ref="grid" />
     <canvas ref="gridMarker" />
   </div>
