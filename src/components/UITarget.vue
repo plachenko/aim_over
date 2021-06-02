@@ -1,9 +1,5 @@
 <template>
   <div class="targetcont" @mousedown="onHit">
-    <!--
-    <div :style="styleObjInner" @click="onHit(2)" ref="target" id="inner" class="circ"></div>
-    <div :style="styleObj" @click="onHit(1)" ref="target" class="circ"></div>
-    -->
     <div class="circ target" />
   </div>
 </template>
@@ -21,25 +17,11 @@ export default defineComponent({
       default: 0
     },
     pos: {
-      type: Object,
-      default: new Position(Math.random()*100, Math.random()*100) 
-    }
-  },
-  computed: {
-    styleObj(): string{
-      let pos = this.pos || {x: 0, y: 0, hit: false};
-      return `top: ${pos.x}px; left: ${pos.y}px;`;
+      type: Object
     },
-    styleObjInner(): string{
-      let pos = this.pos || {x: 0, y: 0, hit: false};
-      let size = 10;
-
-      let offset = {
-        x: pos.x + size,
-        y: pos.y + size
-      }
-
-      return `top: ${offset.x}px; left: ${offset.y}px;`;
+    time: {
+      type: Number,
+      default: 0
     }
   },
   data: function(){
@@ -51,61 +33,62 @@ export default defineComponent({
   },
   methods:{
     onHit(amt = 1){
-      // this.amtHit += amt;
-      // console.log('test')
-      // this.$emit('on-hit', this);
-    },
-    animate(){
-      const el: HTMLElement = this.$refs.target as HTMLElement;
-      const speed = 4;
-      let left: number = parseInt(el.style.left);
-      let leftAmt = 0;
-      let opacityAmt = 0;
+      const pEl = this.$el;
+      const el = pEl.children[0];
 
-      if(this.pos){
+      let w = el.offsetWidth;
+      let h = el.offsetHeight;
 
-        let xPos = this.pos.x || 0;
+      gsap.to(el, {
+        backgroundColor: "rgb(255,0 0)", 
+        opacity: 0,
+        width: 120, 
+        height: 120,
+        left: (w/2)-60, 
+        top: (h/2)-60,
+        duration: .1
+      });
 
-        setInterval(()=>{
-          if(left <= (xPos-left) + 10 || left >= xPos + 20){
-            opacityAmt -= .05;
-            leftAmt = ( left += speed );
-          }else{
-            opacityAmt += .04;
-            leftAmt = ( left += speed/40 );
-          }
-
-          el.style.opacity = opacityAmt+"";
-          el.style.left = ( leftAmt )+"px";
-        }, 10);
-      }
+      this.$emit('onHit')
     }
   },
   mounted(){
     const pEl = this.$el;
     const el = pEl.children[0];
 
-    const x = Math.random() * 100
-    const y = Math.random() * 100
+    // const x = Math.random() * 100
+    // const y = Math.random() * 100
+    const x = this.pos?.x;
+    const y = this.pos?.y;
 
     let w = el.offsetWidth;
     let h = el.offsetHeight;
 
-    pEl.style.left = `${(w/2) + x}px`;
-    pEl.style.top = `${(h/2) + y}px`;
+    pEl.style.left = `${x-(w/2)}px`;
+    pEl.style.top = `${y -(h/2)}px`;
+    // pEl.style.left = `${(w/2) + x}px`;
+    // pEl.style.top = `${(h/2) + y}px`;
     // console.log(this.$vnode.key)
     // console.log(this.id)
     const delay = this.id
+    gsap.from(el, {
+      opacity: 0, 
+      width: 10, 
+      height: 10,
+      left: (w/2)-5, 
+      top: (h/2)-5, 
+      duration:.2
+    });
 
     gsap.to(el, {
       backgroundColor: "rgb(255,0 0)", 
-      left: (w/2), 
-      top: (h/2), 
+      left: (w/2)-5, 
+      top: (h/2)-5, 
       width: 10, 
       height: 10,
-      delay: delay / 3,
+      delay: 1,
       // opacity: 1,
-      opacity: .4,
+      opacity: 0,
       duration:1,
       onComplete: () => {
         gsap.to(el, {opacity: 0, delay: 1});
@@ -130,13 +113,13 @@ export default defineComponent({
   background-color:rgb(0, 0, 255);
   top: 0px;
   left: 0px;
-  z-index: 9999;
+  z-index: 9998;
   /* opacity: 1; */
 }
 #inner{
   background-color:#FF0;
   height: 10px;
   width: 10px;
-  z-index: 9999;
+  z-index: 9998;
 }
 </style>

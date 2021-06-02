@@ -6,6 +6,7 @@
     <div class="actions">
       <div class="btn" @click="$emit('btnEvt', 'play')">Play</div>
       <div class="btn" @click="$emit('btnEvt', 'record')">Record</div>
+      <div class="btn" @click="$emit('btnEvt', 'audio')">Audio</div>
     </div>
   </div>
 </template>
@@ -23,6 +24,8 @@ export default defineComponent({
   mounted(){
     gsap.set("h1 span", {y: "-=30", opacity: 0});
     gsap.set(".actions", {y: "+=50", opacity: 0});
+    gsap.set('#container', {backgroundColor: "rgb(255,255,255)"})
+
 
     gsap.to("h1 span", {
       stagger: {
@@ -37,7 +40,19 @@ export default defineComponent({
       duration: .4,
       delay: .8, 
       onComplete:()=>{
-        gsap.to(".actions", {y: "-=10", opacity: 1, duration: .3})
+        // animate the buttons.
+        gsap.to('.actions', {opacity: 1, y: "-=10", duration: .4});
+        /*
+        gsap.from('.btn', {
+          stagger: function(i, e, l) {
+            console.log(i, e, l)
+            gsap.from(e, {alpha: 0, delay: i + .5, duration: .2});
+            return(i)
+          },
+          delay: 8
+        })
+        */
+        // gsap.to(".actions", {y: "-=10", opacity: 1, duration: .3})
       }
     });
   }

@@ -13,7 +13,9 @@ export default defineComponent({
     }
   },
   mounted(){ 
-    const mount = document;
+    // const mount = this.$el as HTMLElement;
+    // const mount = document;
+    const mount = this.$refs.capture as HTMLElement;
 
     mount.addEventListener('contextmenu', (e) => {
       e.preventDefault();
@@ -38,7 +40,8 @@ export default defineComponent({
   height: 100%;
   position: absolute;
   top: 0px;
-  z-index: 9998;
+  left: 0px;
+  z-index: 9999;
   cursor: crosshair;
   }
 </style>

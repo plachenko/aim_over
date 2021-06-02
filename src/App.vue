@@ -1,9 +1,22 @@
 <template>
   <div id="container">
-    <Builder v-if="DBGBuilder" />
-    <!-- <UILogo v-if="logo" @btnEvt="btnEvt" /> -->
-    <UICapture v-if="false" @pntEvt="pntEvt" />
-    <UITarget v-for="(i, key) in 10" :id="key" :key="key" />
+    <!-- <Builder v-if="DBGBuilder" /> -->
+    <UILogo v-if="states[state] == 'logo'" @btnEvt="btnEvt" />
+    <span>{{currentTime}}</span>
+    <div v-if="states[state] == 'playing'" id="playContainer">
+      <div v-for="(target, key) in targetArr" :key="key">
+        <UITarget v-if="(currentTime >= target.time) && !target.hit" :pos="target.position" @onHit="onHit(target.id)" />
+      </div>
+      <!-- <UITarget  v-for="(i, key) in 10" :id="key" :key="key" /> -->
+      <div v-show="bFlash" id="flash" />
+    </div>
+    <div id="recordingDiv" v-show="states[state] == 'recording'">
+      <UICapture @pntEvt="pntEvt" />
+      <span>Recording</span>
+      <UITarget v-for="(target, key) in targetArr" :pos="target.position" :id="key" :key="key" />
+    </div>
+
+    <UIAudio v-if="audioOn" />
 
     <!-- Start Button -->
     <!--
@@ -25,7 +38,6 @@
 
     <div id="targetCont" ref="targetCont" v-show="running && targetArr">
 
-      <div v-show="bFlash" id="flash" />
 
       <UITarget 
         v-show="checkTargetShow(target)"
@@ -55,18 +67,41 @@
 import { defineComponent } from 'vue';
 import Target from './classes/Target';
 import UITarget from './components/UITarget.vue';
-import Builder from './components/builder/Builder.vue';
+// import Builder from './components/builder/Builder.vue';
 import UILogo from './components/UILogo.vue';
 import UICapture from './components/UICapture.vue';
+import UIAudio from './components/UIAudio.vue';
 import gsap from 'gsap';
+import Position from './classes/Position';
 
 export default defineComponent({
   name: 'App',
   components: {
-    // UILogo,
+    UILogo,
     UICapture,
-    UITarget
+    UITarget,
+    UIAudio
     // Builder
+  },
+  watch: {
+    state: function(val) {
+      switch(val){
+        case 0:
+          window.cancelAnimationFrame(this.loop);
+          this.loop = 0;
+          return;
+        case 1: 
+          this.currentTime = 0;
+          this.loop = window.requestAnimationFrame(this.step)
+          break;
+        case 2:
+          this.currentTime = 0;
+          this.loop = window.requestAnimationFrame(this.step)
+          console.log('resetting array!');
+          this.targetArr = [];
+          break;
+      }
+    }
   },
   computed: {
     targetHitPercent(): number{
@@ -82,7 +117,15 @@ export default defineComponent({
       targetsHit: 0,
       iFlashTime: 30,
       iClickNum: 0,
+      states: [
+        'logo',
+        'playing',
+        'recording'
+      ],
+      state: 0,
+      bPlaying: false,
       bRecording: false,
+      audioOn: false,
       running: false,
       bFlash: false,
       timer: 0,
@@ -90,7 +133,10 @@ export default defineComponent({
       time: 0,
       timeEnd: 0,
       logo: true,
-      timeIncrement: 1
+      timeIncrement: 1,
+      targetId: 0,
+      loop: 0,
+      currentTime: 0
     }
   },
   methods:{
@@ -100,17 +146,36 @@ export default defineComponent({
 
       return res;
     },
+    step(){
+      setTimeout(()=>{
+        this.currentTime++;
+        if(this.loop){
+          window.requestAnimationFrame(this.step)
+        }
+      }, 10)
+    },
     pntEvt(e: any){
-      console.log(e);
+      const target = new Target(this.targetId, e.offsetX, e.offsetY, this.currentTime);
+
+      if(e.pressure){
+        this.addTarget(target)
+      }
+      
+      // this.targetArr.push({pos: pos});
     },
     btnEvt(e: any){
       switch(e){
         case 'play':
-          this.play();
+          this.state = 1;
+          // this.play();
           break;
         case 'record':
-          this.record()
+          this.state = 2;
+          // this.record()
           break;
+        case 'audio':
+          this.audioOn = !this.audioOn;
+          return;
       }
 
       gsap.to('#logo', {opacity: 0, duration: .1, delay: .1})
@@ -120,9 +185,23 @@ export default defineComponent({
     },
     play(){
       console.log('play');
+
+      // State 1 is PLAY -- TODO: Look into labels.
+      // this.state = 1;
+
     },
     record(){
       console.log('record');
+
+      // State 2 is RECORDING -- TODO: Look into labels.
+      // this.state = 2;
+
+      this.loop = requestAnimationFrame((step)=>{
+        setTimeout(() => {
+          (step);
+          this.time++;
+        }, 100);
+      });
     },
     reset(){
       this.time = 90;
@@ -131,8 +210,8 @@ export default defineComponent({
     },
     endRecord(){
       this.bRecording = false;
+      this.running = false;
       this.iClickNum = 0;
-      console.log(this.targetArr);
       this.onEnd();
     },
     onRecord(){
@@ -140,7 +219,7 @@ export default defineComponent({
 
       this.running = true;
       this.bRecording = true;
-      this.startTimer();
+      // this.startTimer();
     },
     onStart(){
       // Start game
@@ -168,6 +247,7 @@ export default defineComponent({
     addTarget(target: Target){
       const tArr: Target[] = this.targetArr;
       tArr.push(target)
+      this.targetId ++;
     },
     generateTargets(){
       const contEl = this.$refs.targetCont as HTMLElement;
@@ -181,19 +261,10 @@ export default defineComponent({
       }
     },
     onHit(i: number){
-      this.bFlash = true;
-      setTimeout(() => {
-        this.bFlash = false;
-      }, this.iFlashTime)
+      gsap.from('#container', {backgroundColor: "rgb(255,0,0)", duration: .2});
 
       const tObj: Target = this.targetArr[i];
       tObj.hit = true;
-
-      /*
-      if(this.targetsHit >= this.targetArr.length-1){
-        this.onEnd();
-      }
-      */
 
       this.targetsHit ++;
     },
@@ -204,14 +275,13 @@ export default defineComponent({
     },
     onSpeed(amt = 1){
       this.tickTime = (amt * 1000);
-    }
+    },
   },
   mounted(){
     document.addEventListener("keyup", (e) => {
-      console.log(e.code)
       switch(e.code){
         case 'Space':
-          this.logo = true;
+          this.state = 0
           this.endRecord();
           break;
         case 'KeyQ':
@@ -297,5 +367,18 @@ body, html{
   height: 100%;
   z-index: 9999;
   background-color:#F00;
+}
+#recordingDiv{
+  width:100%;
+  height:100%;
+  overflow: hidden;
+}
+
+#playContainer{
+  position: absolute;
+  width:100%;
+  height: 100%;
+  left: 0px;
+  top:0px;
 }
 </style>
